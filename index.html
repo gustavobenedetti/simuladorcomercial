@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Comercial</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e28;
+    --border: #252a38;
+    --accent1: #00e5a0;
+    --accent2: #4e7cff;
+    --accent3: #ff6b35;
+    --text: #e8ecf4;
+    --muted: #6b7592;
+    --label: #9ba8c4;
+    --radius: 14px;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 52px;
+    animation: fadeUp .6s ease both;
+  }
+
+  .header-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .2em;
+    color: var(--accent1);
+    text-transform: uppercase;
+    background: rgba(0,229,160,.08);
+    border: 1px solid rgba(0,229,160,.2);
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.1;
+    margin-bottom: 14px;
+  }
+
+  h1 span { color: var(--accent1); }
+
+  .header p {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* SECTION CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px;
+    margin-bottom: 28px;
+    animation: fadeUp .6s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .card-inercia::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+  .card-prev::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+
+  .card:nth-child(2) { animation-delay: .1s; }
+  .card:nth-child(3) { animation-delay: .2s; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .section-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .icon-orange { background: rgba(255,107,53,.12); }
+  .icon-blue { background: rgba(78,124,255,.12); }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+
+  .section-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .card { padding: 24px 20px; }
+  }
+
+  /* INPUTS */
+  .field { display: flex; flex-direction: column; gap: 7px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--label);
+  }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .prefix, .suffix {
+    position: absolute;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .prefix { left: 14px; }
+  .suffix { right: 14px; }
+
+  input[type="number"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  input[type="number"]:focus {
+    border-color: var(--accent1);
+    box-shadow: 0 0 0 3px rgba(0,229,160,.08);
+  }
+
+  .has-prefix input { padding-left: 38px; }
+  .has-suffix input { padding-right: 38px; }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  /* RESULTS */
+  .results-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .results-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .result-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    transition: transform .15s;
+  }
+
+  .result-box:hover { transform: translateY(-2px); }
+
+  .result-box .r-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .result-box .r-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .result-box .r-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+    font-weight: 300;
+  }
+
+  .color-green { color: var(--accent1); }
+  .color-orange { color: var(--accent3); }
+  .color-blue { color: var(--accent2); }
+
+  .result-box.highlight-green { border-color: rgba(0,229,160,.3); background: rgba(0,229,160,.05); }
+  .result-box.highlight-orange { border-color: rgba(255,107,53,.3); background: rgba(255,107,53,.05); }
+  .result-box.highlight-blue { border-color: rgba(78,124,255,.3); background: rgba(78,124,255,.05); }
+
+  /* FUNNEL */
+  .funnel {
+    margin-top: 24px;
+  }
+
+  .funnel-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    margin-bottom: 4px;
+    transition: background .2s;
+  }
+
+  .funnel-step:hover { background: var(--surface2); }
+
+  .funnel-step .f-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .funnel-step .f-name {
+    font-size: 13px;
+    color: var(--label);
+    flex: 1;
+  }
+
+  .funnel-step .f-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .funnel-step .f-rate {
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  /* SLIDER */
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 100px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent1);
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(0,229,160,.2);
+    transition: box-shadow .2s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(0,229,160,.2);
+  }
+
+  .range-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent1);
+    min-width: 42px;
+    text-align: right;
+  }
+
+  /* ANNOTATION */
+  .insight {
+    background: rgba(78,124,255,.07);
+    border: 1px solid rgba(78,124,255,.2);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--label);
+    line-height: 1.6;
+    margin-top: 20px;
+  }
+
+  .insight strong { color: var(--text); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .num-anim {
+    display: inline-block;
+    transition: all .3s ease;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-tag">Simulador Comercial</div>
+    <h1>Diagnóstico de<br><span>Performance Comercial</span></h1>
+    <p>Calcule o custo da inércia e planeje com precisão quantos leads você precisa para bater sua meta.</p>
+  </div>
+
+  <!-- CARD 1 — CUSTO DE INÉRCIA -->
+  <div class="card card-inercia">
+    <div class="section-header">
+      <div class="section-icon icon-orange">🔥</div>
+      <div>
+        <div class="section-title">Custo de Inércia</div>
+        <div class="section-subtitle">O quanto a sua empresa está deixando de ganhar hoje</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Faturamento médio mensal</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">R$</span>
+          <input type="number" id="fat-mensal" value="150000" min="0" step="1000" oninput="calcInercia()">
+        </div>
+      </div>
+      <div class="field">
+        <label>Meta de faturamento mensal</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">R$</span>
+          <input type="number" id="fat-meta" value="172500" min="0" step="1000" oninput="calcInercia()">
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom: 24px;">
+      <label>Potencial de crescimento estimado</label>
+      <div class="slider-wrap">
+        <input type="range" id="pct-slider" min="1" max="100" value="15" oninput="syncSlider(this.value); calcInercia()">
+        <span class="range-val" id="pct-display">15%</span>
+        <input type="number" id="pct-input" value="15" min="1" max="100" style="width:70px; text-align:center;" oninput="syncInput(this.value); calcInercia()">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="results-label">Resultado</div>
+
+    <div class="results-grid">
+      <div class="result-box highlight-orange">
+        <div class="r-label">Ganho mensal potencial</div>
+        <div class="r-value color-orange" id="r-mensal">R$ 22.500</div>
+        <div class="r-desc">Com estrutura comercial eficiente</div>
+      </div>
+      <div class="result-box highlight-green">
+        <div class="r-label">Custo de inércia anual</div>
+        <div class="r-value color-green" id="r-anual">R$ 270.000</div>
+        <div class="r-desc">Deixado na mesa em 12 meses</div>
+      </div>
+      <div class="result-box">
+        <div class="r-label">Crescimento sobre atual</div>
+        <div class="r-value" id="r-pct">15%</div>
+        <div class="r-desc">De <span id="r-fat-atual">R$ 150.000</span> para <span id="r-fat-novo">R$ 172.500</span>/mês</div>
+      </div>
+    </div>
+
+    <div class="insight" id="inercia-insight">
+      💡 <strong>Diagnóstico:</strong> Mantendo a operação como está, você perde <strong id="i-valor">R$ 270.000</strong> ao ano — dinheiro que já existe no mercado e que a sua empresa não está capturando por falta de estrutura comercial.
+    </div>
+  </div>
+
+  <!-- CARD 2 — GESTÃO DE PREVISIBILIDADE -->
+  <div class="card card-prev">
+    <div class="section-header">
+      <div class="section-icon icon-blue">📊</div>
+      <div>
+        <div class="section-title">Gestão de Previsibilidade</div>
+        <div class="section-subtitle">Engenharia reversa da sua meta de faturamento</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Meta de faturamento mensal</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">R$</span>
+          <input type="number" id="meta-fat" value="172500" min="0" step="1000" oninput="calcPrev()">
+        </div>
+      </div>
+      <div class="field">
+        <label>Ticket médio por venda</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">R$</span>
+          <input type="number" id="ticket" value="5000" min="1" step="100" oninput="calcPrev()">
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Taxa de qualificação de leads</label>
+        <div class="input-wrap has-suffix">
+          <input type="number" id="pct-qual" value="60" min="1" max="100" oninput="calcPrev()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Taxa de conversão em venda</label>
+        <div class="input-wrap has-suffix">
+          <input type="number" id="pct-conv" value="25" min="1" max="100" oninput="calcPrev()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Custo médio por lead (mídia)</label>
+        <div class="input-wrap has-prefix">
+          <span class="prefix">R$</span>
+          <input type="number" id="cpl" value="30" min="0" oninput="calcPrev()">
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="results-label">Resultado — Engenharia Reversa</div>
+
+    <div class="results-grid">
+      <div class="result-box highlight-blue">
+        <div class="r-label">Vendas necessárias</div>
+        <div class="r-value color-blue" id="p-vendas">35</div>
+        <div class="r-desc">Para atingir a meta/mês</div>
+      </div>
+      <div class="result-box">
+        <div class="r-label">Leads qualificados</div>
+        <div class="r-value" id="p-opor">140</div>
+        <div class="r-desc">Oportunidades reais no pipeline</div>
+      </div>
+      <div class="result-box highlight-orange">
+        <div class="r-label">Total de leads necessários</div>
+        <div class="r-value color-orange" id="p-leads">233</div>
+        <div class="r-desc">Entrada total no funil/mês</div>
+      </div>
+    </div>
+
+    <div class="results-grid" style="margin-top: 14px;">
+      <div class="result-box">
+        <div class="r-label">Investimento em mídia/mês</div>
+        <div class="r-value color-green" id="p-invest">R$ 6.990</div>
+        <div class="r-desc">Custo para gerar os leads</div>
+      </div>
+      <div class="result-box">
+        <div class="r-label">Custo de aquisição (CAC)</div>
+        <div class="r-value" id="p-cac">R$ 200</div>
+        <div class="r-desc">Por cliente convertido</div>
+      </div>
+      <div class="result-box highlight-green">
+        <div class="r-label">ROI da mídia</div>
+        <div class="r-value color-green" id="p-roi">24.7×</div>
+        <div class="r-desc">Retorno sobre investimento</div>
+      </div>
+    </div>
+
+    <!-- FUNIL VISUAL -->
+    <div class="divider"></div>
+    <div class="results-label">Funil de conversão</div>
+    <div class="funnel" id="funil">
+      <!-- preenchido por JS -->
+    </div>
+
+    <div class="insight" id="prev-insight"></div>
+  </div>
+
+</div>
+
+<script>
+  function fmt(n) {
+    if (n === undefined || isNaN(n)) return '—';
+    if (n >= 1e6) return 'R$ ' + (n/1e6).toFixed(2).replace('.',',') + 'M';
+    return 'R$ ' + Math.round(n).toLocaleString('pt-BR');
+  }
+
+  function fmtN(n) {
+    if (isNaN(n)) return '—';
+    return Math.ceil(n).toLocaleString('pt-BR');
+  }
+
+  // Slider sync
+  function syncSlider(v) {
+    document.getElementById('pct-input').value = v;
+    document.getElementById('pct-display').textContent = v + '%';
+    // also update meta from faturamento
+    const fat = parseFloat(document.getElementById('fat-mensal').value) || 0;
+    document.getElementById('fat-meta').value = Math.round(fat * (1 + v/100));
+    document.getElementById('meta-fat').value = Math.round(fat * (1 + v/100));
+  }
+
+  function syncInput(v) {
+    v = Math.min(100, Math.max(1, v));
+    document.getElementById('pct-slider').value = v;
+    document.getElementById('pct-display').textContent = v + '%';
+  }
+
+  function calcInercia() {
+    const fat = parseFloat(document.getElementById('fat-mensal').value) || 0;
+    const pct = parseFloat(document.getElementById('pct-slider').value) || 0;
+    const ganhoMes = fat * pct / 100;
+    const ganhoAno = ganhoMes * 12;
+    const fatNovo = fat + ganhoMes;
+
+    document.getElementById('r-mensal').textContent = fmt(ganhoMes);
+    document.getElementById('r-anual').textContent = fmt(ganhoAno);
+    document.getElementById('r-pct').textContent = pct + '%';
+    document.getElementById('r-fat-atual').textContent = fmt(fat);
+    document.getElementById('r-fat-novo').textContent = fmt(fatNovo);
+    document.getElementById('i-valor').textContent = fmt(ganhoAno);
+    document.getElementById('fat-meta').value = Math.round(fatNovo);
+    document.getElementById('meta-fat').value = Math.round(fatNovo);
+
+    calcPrev();
+  }
+
+  function calcPrev() {
+    const meta = parseFloat(document.getElementById('meta-fat').value) || 0;
+    const ticket = parseFloat(document.getElementById('ticket').value) || 1;
+    const pctQual = parseFloat(document.getElementById('pct-qual').value) / 100 || 0;
+    const pctConv = parseFloat(document.getElementById('pct-conv').value) / 100 || 0;
+    const cpl = parseFloat(document.getElementById('cpl').value) || 0;
+
+    const vendas = meta / ticket;
+    const leadsQual = pctConv > 0 ? vendas / pctConv : 0;
+    const leadsTotal = pctQual > 0 ? leadsQual / pctQual : 0;
+    const invest = leadsTotal * cpl;
+    const cac = invest / (vendas || 1);
+    const roi = invest > 0 ? meta / invest : 0;
+
+    document.getElementById('p-vendas').textContent = fmtN(vendas);
+    document.getElementById('p-opor').textContent = fmtN(leadsQual);
+    document.getElementById('p-leads').textContent = fmtN(leadsTotal);
+    document.getElementById('p-invest').textContent = cpl > 0 ? fmt(invest) : '—';
+    document.getElementById('p-cac').textContent = cpl > 0 ? fmt(cac) : '—';
+    document.getElementById('p-roi').textContent = cpl > 0 ? roi.toFixed(1) + '×' : '—';
+
+    // Funil
+    const steps = [
+      { name: 'Leads gerados', val: Math.ceil(leadsTotal), color: '#4e7cff', rate: '100%' },
+      { name: 'Leads qualificados', val: Math.ceil(leadsQual), color: '#00b4ff', rate: (pctQual*100).toFixed(0)+'% qualificados' },
+      { name: 'Vendas realizadas', val: Math.ceil(vendas), color: '#00e5a0', rate: (pctConv*100).toFixed(0)+'% convertidos' },
+    ];
+
+    let html = '';
+    steps.forEach(s => {
+      html += `<div class="funnel-step">
+        <div class="f-dot" style="background:${s.color}"></div>
+        <div class="f-name">${s.name}</div>
+        <div class="f-val" style="color:${s.color}">${isNaN(s.val) ? '—' : s.val.toLocaleString('pt-BR')}</div>
+        <div class="f-rate">${s.rate}</div>
+      </div>`;
+    });
+    document.getElementById('funil').innerHTML = html;
+
+    // Insight
+    document.getElementById('prev-insight').innerHTML = `💡 <strong>Plano de ação:</strong> Para faturar <strong>${fmt(meta)}/mês</strong>, você precisa gerar <strong>${fmtN(leadsTotal)} leads totais</strong>, dos quais <strong>${fmtN(leadsQual)} são qualificados</strong>. Com uma taxa de conversão de <strong>${(pctConv*100).toFixed(0)}%</strong>, isso resulta em <strong>${fmtN(vendas)} vendas</strong>.${cpl > 0 ? ` O investimento estimado em mídia é de <strong>${fmt(invest)}/mês</strong>, com ROI de <strong>${roi.toFixed(1)}×</strong>.` : ''}`;
+  }
+
+  // Init
+  calcInercia();
+  calcPrev();
+</script>
+</body>
+</html>
