@@ -89,6 +89,35 @@
   .roi-bar-track { height: 8px; background: var(--border); border-radius: 100px; overflow: hidden; margin-bottom: 8px; }
   .roi-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent4), var(--accent1)); transition: width .5s ease; width: 0%; }
   .roi-bar-meta { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  /* PILLAR CARDS */
+  .pillar-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 0; }
+  @media (max-width: 700px) { .pillar-grid { grid-template-columns: 1fr; } }
+
+  .pillar-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px; transition: border-color .2s; }
+  .pillar-card:hover { border-color: rgba(255,255,255,.12); }
+
+  .pillar-canais  { border-top: 2px solid var(--accent3); }
+  .pillar-processo{ border-top: 2px solid var(--accent2); }
+  .pillar-oferta  { border-top: 2px solid var(--accent1); }
+
+  .pillar-header { display: flex; align-items: flex-start; gap: 10px; }
+  .pillar-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .pillar-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .pillar-sub { font-size: 11px; color: var(--muted); }
+
+  .pillar-slider-wrap { display: flex; align-items: center; gap: 10px; }
+  .pillar-range { flex: 1; }
+  .range-canais::-webkit-slider-thumb  { background: var(--accent3); box-shadow: 0 0 0 3px rgba(255,107,53,.2); }
+  .range-processo::-webkit-slider-thumb{ background: var(--accent2); box-shadow: 0 0 0 3px rgba(78,124,255,.2); }
+  .range-oferta::-webkit-slider-thumb  { background: var(--accent1); box-shadow: 0 0 0 3px rgba(0,229,160,.2); }
+
+  .pillar-pct { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; min-width: 38px; text-align: right; color: var(--text); }
+
+  .pillar-result { background: var(--bg); border-radius: 8px; padding: 12px 14px; }
+  .pillar-result-label { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .pillar-result-value { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+  .pillar-result-sub { font-size: 11px; color: var(--muted); }
+
   .hidden { display: none !important; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -108,51 +137,108 @@
       <div class="section-icon icon-orange">🔥</div>
       <div>
         <div class="section-title">Custo de Inércia</div>
-        <div class="section-subtitle">O quanto a sua empresa está deixando de ganhar hoje:</div>
+        <div class="section-subtitle">Simule o impacto de melhorias nos três pilares comerciais</div>
       </div>
     </div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Faturamento médio mensal</label>
-        <div class="input-wrap has-prefix"><span class="prefix">R$</span>
-          <input type="number" id="fat-mensal" value="150000" min="0" step="1000" oninput="calcInercia()">
+
+    <!-- Faturamento atual -->
+    <div class="field" style="max-width:320px; margin-bottom:32px;">
+      <label>Faturamento médio mensal atual</label>
+      <div class="input-wrap has-prefix"><span class="prefix">R$</span>
+        <input type="number" id="fat-mensal" value="150000" min="0" step="1000" oninput="calcInercia()">
+      </div>
+    </div>
+
+    <!-- Três sliders -->
+    <div class="pillar-grid">
+
+      <div class="pillar-card pillar-canais">
+        <div class="pillar-header">
+          <span class="pillar-icon">📢</span>
+          <div>
+            <div class="pillar-title">Canais de Aquisição</div>
+            <div class="pillar-sub">Mais oportunidades entrando</div>
+          </div>
+        </div>
+        <div class="pillar-slider-wrap">
+          <input type="range" class="pillar-range range-canais" id="sl-canais" min="0" max="100" value="0" oninput="updatePillar('canais',this.value)">
+          <span class="pillar-pct" id="pct-canais">0%</span>
         </div>
       </div>
-      <div class="field">
-        <label>Meta de faturamento mensal</label>
-        <div class="input-wrap has-prefix"><span class="prefix">R$</span>
-          <input type="number" id="fat-meta" value="172500" min="0" step="1000" oninput="calcInercia()">
+
+      <div class="pillar-card pillar-processo">
+        <div class="pillar-header">
+          <span class="pillar-icon">⚙️</span>
+          <div>
+            <div class="pillar-title">Processo Comercial</div>
+            <div class="pillar-sub">Maior taxa de conversão</div>
+          </div>
+        </div>
+        <div class="pillar-slider-wrap">
+          <input type="range" class="pillar-range range-processo" id="sl-processo" min="0" max="100" value="0" oninput="updatePillar('processo',this.value)">
+          <span class="pillar-pct" id="pct-processo">0%</span>
         </div>
       </div>
-    </div>
-    <div class="field" style="margin-bottom:24px;">
-      <label>Potencial de crescimento estimado</label>
-      <div class="slider-wrap">
-        <input type="range" id="pct-slider" min="1" max="100" value="15" oninput="syncSlider(this.value);calcInercia()">
-        <span class="range-val" id="pct-display">15%</span>
-        <input type="number" id="pct-input" value="15" min="1" max="100" style="width:70px;text-align:center;" oninput="syncInput(this.value);calcInercia()">
+
+      <div class="pillar-card pillar-oferta">
+        <div class="pillar-header">
+          <span class="pillar-icon">💎</span>
+          <div>
+            <div class="pillar-title">Oferta</div>
+            <div class="pillar-sub">Maior ticket médio</div>
+          </div>
+        </div>
+        <div class="pillar-slider-wrap">
+          <input type="range" class="pillar-range range-oferta" id="sl-oferta" min="0" max="100" value="0" oninput="updatePillar('oferta',this.value)">
+          <span class="pillar-pct" id="pct-oferta">0%</span>
+        </div>
+      </div>
+
+    </div><!-- /pillar-grid -->
+
+    <!-- Resultados individuais -->
+    <div class="results-grid-3" style="margin-top:20px;">
+      <div class="result-box">
+        <div class="r-label">📢 Canais</div>
+        <div class="r-value color-orange" id="ganho-canais">R$ 0</div>
+        <div class="r-desc" id="fat-canais">= R$ 150.000/mês</div>
+      </div>
+      <div class="result-box">
+        <div class="r-label">⚙️ Processo</div>
+        <div class="r-value color-blue" id="ganho-processo">R$ 0</div>
+        <div class="r-desc" id="fat-processo">= R$ 150.000/mês</div>
+      </div>
+      <div class="result-box">
+        <div class="r-label">💎 Oferta</div>
+        <div class="r-value color-green" id="ganho-oferta">R$ 0</div>
+        <div class="r-desc" id="fat-oferta">= R$ 150.000/mês</div>
       </div>
     </div>
+
     <div class="divider"></div>
-    <div class="results-label">Resultado</div>
-    <div class="results-grid">
+    <div class="results-label">Projeção combinada</div>
+
+    <div class="results-grid-3">
       <div class="result-box highlight-orange">
-        <div class="r-label">Ganho mensal potencial</div>
-        <div class="r-value color-orange" id="r-mensal">R$ 22.500</div>
-        <div class="r-desc">Com estrutura comercial eficiente</div>
+        <div class="r-label">Faturamento projetado/mês</div>
+        <div class="r-value color-orange" id="r-fat-novo">R$ 150.000</div>
+        <div class="r-desc">Versus <span id="r-fat-atual">R$ 150.000</span> atual</div>
+      </div>
+      <div class="result-box">
+        <div class="r-label">Crescimento total</div>
+        <div class="r-value" id="r-pct">0%</div>
+        <div class="r-desc">Efeito multiplicativo dos pilares</div>
       </div>
       <div class="result-box highlight-green">
         <div class="r-label">Custo de inércia anual</div>
-        <div class="r-value color-green" id="r-anual">R$ 270.000</div>
+        <div class="r-value color-green" id="r-anual">R$ 0</div>
         <div class="r-desc">Deixado na mesa em 12 meses</div>
       </div>
-      <div class="result-box">
-        <div class="r-label">Crescimento sobre atual</div>
-        <div class="r-value" id="r-pct">15%</div>
-        <div class="r-desc">De <span id="r-fat-atual">R$ 150.000</span> para <span id="r-fat-novo">R$ 172.500</span>/mês</div>
-      </div>
     </div>
-    <div class="insight">💡 <strong>Diagnóstico:</strong> Mantendo a operação como está, você perde <strong id="i-valor">R$ 270.000</strong> ao ano — dinheiro que já existe no mercado e que a sua empresa não está capturando por falta de estrutura comercial.</div>
+
+    <div class="insight" id="inercia-insight">
+      💡 Ajuste os sliders acima para simular melhorias em cada pilar e ver o impacto no faturamento.
+    </div>
   </div>
 
   <!-- GESTÃO DE PREVISIBILIDADE -->
@@ -371,33 +457,58 @@
     return Math.ceil(n).toLocaleString('pt-BR');
   }
 
-  function syncSlider(v) {
-    document.getElementById('pct-input').value = v;
-    document.getElementById('pct-display').textContent = v+'%';
-    const fat = parseFloat(document.getElementById('fat-mensal').value)||0;
-    const novo = Math.round(fat*(1+v/100));
-    document.getElementById('fat-meta').value = novo;
-    document.getElementById('meta-fat').value = novo;
-  }
-  function syncInput(v) {
-    v = Math.min(100,Math.max(1,v));
-    document.getElementById('pct-slider').value = v;
-    document.getElementById('pct-display').textContent = v+'%';
+  // ── PILARES ──
+  const pilares = { canais: 0, processo: 0, oferta: 0 };
+
+  function updatePillar(pilar, val) {
+    pilares[pilar] = parseFloat(val) || 0;
+    document.getElementById('pct-' + pilar).textContent = val + '%';
+    calcInercia();
   }
 
   function calcInercia() {
-    const fat = parseFloat(document.getElementById('fat-mensal').value)||0;
-    const pct = parseFloat(document.getElementById('pct-slider').value)||0;
-    const ganhoMes = fat*pct/100;
-    const ganhoAno = ganhoMes*12;
-    const fatNovo  = fat+ganhoMes;
-    document.getElementById('r-mensal').textContent    = fmt(ganhoMes);
-    document.getElementById('r-anual').textContent     = fmt(ganhoAno);
-    document.getElementById('r-pct').textContent       = pct+'%';
-    document.getElementById('r-fat-atual').textContent = fmt(fat);
+    const base = parseFloat(document.getElementById('fat-mensal').value) || 0;
+    const mC = 1 + pilares.canais   / 100;
+    const mP = 1 + pilares.processo / 100;
+    const mO = 1 + pilares.oferta   / 100;
+
+    // Individual
+    const fatCanais   = base * mC;
+    const fatProcesso = base * mP;
+    const fatOferta   = base * mO;
+
+    document.getElementById('ganho-canais').textContent   = fmt(fatCanais - base);
+    document.getElementById('fat-canais').textContent     = '= ' + fmt(fatCanais) + '/mês';
+    document.getElementById('ganho-processo').textContent = fmt(fatProcesso - base);
+    document.getElementById('fat-processo').textContent   = '= ' + fmt(fatProcesso) + '/mês';
+    document.getElementById('ganho-oferta').textContent   = fmt(fatOferta - base);
+    document.getElementById('fat-oferta').textContent     = '= ' + fmt(fatOferta) + '/mês';
+
+    // Combinado (multiplicativo)
+    const fatNovo   = base * mC * mP * mO;
+    const ganhoMes  = fatNovo - base;
+    const ganhoAno  = ganhoMes * 12;
+    const pctTotal  = ((mC * mP * mO - 1) * 100).toFixed(1);
+
     document.getElementById('r-fat-novo').textContent  = fmt(fatNovo);
-    document.getElementById('i-valor').textContent     = fmt(ganhoAno);
-    document.getElementById('fat-meta').value = Math.round(fatNovo);
+    document.getElementById('r-fat-atual').textContent = fmt(base);
+    document.getElementById('r-pct').textContent       = pctTotal + '%';
+    document.getElementById('r-anual').textContent     = fmt(ganhoAno);
+
+    // Insight dinâmico
+    const ativos = [];
+    if (pilares.canais   > 0) ativos.push(`<strong>${pilares.canais}%</strong> em canais`);
+    if (pilares.processo > 0) ativos.push(`<strong>${pilares.processo}%</strong> em processo`);
+    if (pilares.oferta   > 0) ativos.push(`<strong>${pilares.oferta}%</strong> em oferta`);
+
+    const insight = document.getElementById('inercia-insight');
+    if (ativos.length === 0) {
+      insight.innerHTML = '💡 Ajuste os sliders acima para simular melhorias em cada pilar e ver o impacto no faturamento.';
+    } else {
+      insight.innerHTML = `💡 <strong>Diagnóstico:</strong> Com melhorias de ${ativos.join(', ')}, o faturamento sairia de <strong>${fmt(base)}</strong> para <strong>${fmt(fatNovo)}/mês</strong> — um ganho de <strong>${fmt(ganhoMes)}/mês</strong> ou <strong>${fmt(ganhoAno)}/ano</strong>. O efeito combinado é multiplicativo: cada pilar potencializa o outro.`;
+    }
+
+    // Sync faturamento para card de previsibilidade
     document.getElementById('meta-fat').value = Math.round(fatNovo);
     calcPrev();
   }
